@@ -21,6 +21,11 @@ import difflib
 app = Flask(__name__, template_folder="my_html", static_folder="my_js")
 
 
+# 对比两个字符串相似度函数
+def get_equal_rate(str1, str2):
+    return difflib.SequenceMatcher(None, str1, str2).quick_ratio()
+
+
 # 现在点餐，外卖小哥找指定地方买餐,通过装饰器限制网址
 # app表示的就是应用，route表示路由
 # 这里的"/"表示根目录
@@ -108,11 +113,6 @@ def sign_in():
     return json.dumps({"face": img_result, "time": time_sgin_in, "names": names_result}, ensure_ascii=False)
 
 
-# 对比两个字符串相似度函数
-def get_equal_rate(str1, str2):
-    return difflib.SequenceMatcher(None, str1, str2).quick_ratio()
-
-
 @app.route("/sign_out", methods=["GET", "POST"])
 def sign_out():
     # data是一个字符串 摄像头返回的图像
@@ -189,7 +189,7 @@ def sign_out():
     if names == "mask":
         names_result = "识别到口罩"
     elif names == "face":
-        names_result = "识别到没戴口罩,请戴口罩"
+        names_result = "识别到没戴口罩,请戴口罩!"
     else:
         names_result = "无人脸信息"
     return json.dumps({"face": img_result1, "time": time_sgin_out, "names": names_result}, ensure_ascii=False)
