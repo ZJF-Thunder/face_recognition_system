@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!--meta表示网页采用utf8格式-->
+        <meta charset="UTF-8">
+        <title>人脸口罩识别签到打卡系统</title>
+        <link rel="stylesheet" href="../my_js/bootstrap.css">
+        <script src="../my_js/jquery.min.js"></script>
+        <script src="../my_js/boostrap.js"></script>
+        <style>
+            body{
+                background:url("../my_js/bg5.gif") no-repeat;
+                background-size:100% 100%;
+                height:900px;
+            }
+            video,img{
+                border:5px outset orange;
+            }
+            h1{
+                color:red;
+                font-family:"华文琥珀";
+                font-size:80px;
+            }
+            h3{
+                color:blue;
+                font-family:"华文琥珀"
+            }
+            #kou{
+                color: #db7b17;
+                font-family:"华文琥珀"
+            }
+        </style>
+    </head>
+    <body>
+        <br/><br/>
+        <center><h1>人脸口罩识别签到打卡系统</h1></center>
+        <center> <h3 id="kou">检测是否带口罩</h3></center>
+        <br/><br/>
+        <div class="row">
+            <div class="col-sm-6">
+                <center><h3>请看摄像头</h3></center>
+                <center><video width="400" height="400" id="myvideo"></video></center>
+            </div>
+            <div class="col-sm-6">
+                <center><h3 id="mytime">你当前还没有签到数据,请签到</h3></center>
+                <center><img src="../my_js/face.jpg" id="myimg" width="400" height="400"/></center>
+                <center><canvas width="400" height="400" id="mycanvas"></canvas></center>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-2">
+                <button type="button" onclick="sign_in()" class="btn btn-success btn-lg">签到</button>
+                <button type="button" onclick="sign_out()" class="btn btn-success btn-lg">签退</button>
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <script>
+            //获取画布
+            mycanvas=document.getElementById("mycanvas")
+            //隐藏画布,visibility：hidden占位隐藏，这里不合适，换成不占位display:none
+            mycanvas.style="display:none"
+            //签到
+            function sign_in(){
+                //html中的画布分为2D和3D画，这里获取的2D画
+                ctx=mycanvas.getContext("2d")
+                //调用drawImage画myvideo中的内容，画图像指示的从哪里画到哪里，从0,0到400,400
+                ctx.drawImage(myvideo,0,0,400,400)
+                //把canvas画布的图片变成数据,使用方法toDataURL把图片转成数据
+                result=mycanvas.toDataURL()
+                result=result.substring(22)
+                //ajax请求提交后台数据
+                //返回的res是一个json数据，json数据中有一键是face，其值是base64编码的数据
+                $.post("/sign_in",{"face":result},function(res){
+                    console.log(res)
+                    //后台数据返回给前端显示
+                    res=JSON.parse(res)
+                    imgcode="data:image/png;base64,"+res["face"]
+                    document.getElementById("myimg").src=imgcode
+                    //获取签到时间
+                    document.getElementById("kou").innerText=res["names"]
+                    //签到时间  如果为空，证明没有人脸，签到失败
+                    if (res["time"] == null){
+                        document.getElementById("mytime").innerText="签到失败！"
+                    }
+                    else {
+                        document.getElementById("mytime").innerText="签到时间:"+res["time"]
+                    }
+
+                })
+
+            }
+            //签退
+            function sign_out(){
+                //html中的画布分为2D和3D画，这里获取的2D画
+                ctx=mycanvas.getContext("2d")
+                //调用drawImage画myvideo中的内容，画图像指示的从哪里画到哪里，从0,0到400,400
+                ctx.drawImage(myvideo,0,0,400,400)
+                //把canvas画布的图片变成数据,使用方法toDataURL把图片转成数据
+                result=mycanvas.toDataURL()
+                result=result.substring(22)
+                //ajax请求提交后台数据
+                $.post("/sign_out",{"face":result},function(res){
+                    console.log(res)
+                    //后台数据返回给前端显示
+                    res=JSON.parse(res)
+                    //人脸
+                    imgcode="data:image/png;base64,"+res["face"]
+                    document.getElementById("myimg").src=imgcode
+                    //口罩
+                    document.getElementById("kou").innerText=res["names"]
+                    //签退时间  如果为空，证明没有人脸，签退失败
+                    if (res["time"] == null){
+                        document.getElementById("mytime").innerText="签退失败！"
+                    }
+                    else {
+                        document.getElementById("mytime").innerText="签退时间:"+res["time"]
+                    }
+                })
+            }
+
+            //进入页面后就执行，所以直接在<script>标签中使用
+            //先根据video的id取video的标签
+            myvideo=document.getElementById("myvideo")
+            //设置一个摄像头的焦距,在这里只是进行录像，不录音，指明video,如果录音需要指定audio
+            cons={
+                video:{
+                    width:400,
+                    height:400
+                }
+            }
+            //固写调用摄像头的语句
+            pros=navigator.mediaDevices.getUserMedia(cons)
+            //把摄像头的内容给video标签,then如果存在摄像头，就把摄像头的内容取出，放在function的res中
+            pros.then(function(res){
+                //res就是取出的摄像头内容,把内容取出放在myvideo中srcObject
+                myvideo.srcObject=res
+                //播放视频
+                myvideo.play()
+            })
+        </script>
+    </body>
+</html>
