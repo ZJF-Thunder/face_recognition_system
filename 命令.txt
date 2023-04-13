@@ -1,0 +1,65 @@
+yolov5口罩识别任务
+
+训练命令：
+预训练模型加载：
+python yolov5-master/train.py --batch-size 16 --epochs 200 --weights yolov5-master\weights\yolov5s.pt --data yolov5-master\data\yaml\field.yaml --cfg yolov5-master\models\yolov5s.yaml --imgsz 640 --workers 12
+
+python yolov5-master/train.py --batch-size 16 --epochs 200 --weights yolov5-master\weights\yewai_best.pt --data yolov5-master\data\yaml\field.yaml --cfg yolov5-master\models\yolov5s.yaml --imgsz 640 --workers 12
+
+# 口罩识别
+python yolov5-master/train.py --batch-size 16 --epochs 200 --weights yolov5-master\weights\mask_last.pt --data yolov5-master\data\yaml\mask_data.yaml --cfg yolov5-master\models\yolov5s.yaml --imgsz 640 --workers 12
+
+
+从头开始训练，无预训练模型：
+python yolov5-master/train.py --batch-size 16 --epochs 200 --weights  None --data yolov5-master\data\yaml\field.yaml --cfg yolov5-master\models\yolov5s.yaml --imgsz 640 --workers 12
+
+
+推理命令：
+python yolov5-master/detect.py --weights yolov5-master\weights\yewai_best.pt --source yolov5-master\data\test\6.png --imgsz 1440 --conf-thres 0.50
+
+python yolov5-master/detect.py --weights yolov5-master\weights\yewai_best.pt --source yolov5-master\data\test\3.jpg --imgsz 1440 --conf-thres 0.30
+
+
+
+
+
+yoloX口罩识别任务
+
+推理命令：
+图片：
+python tools/demo.py image -n yolox-s -c /path/to/your/yolox_s.pth --path assets/dog.jpg --conf 0.25 --nms 0.45 --tsize 640 --save_result --device [cpu/gpu]
+
+python tools/demo.py image -f exps/default/yolox_s.py -c ./yolox_s.pth --path assets/dog.jpg --conf 0.25 --nms 0.45 --tsize 640 --save_result --device [cpu/gpu]
+
+
+python tools/demo.py image -f exps/default/yolox_s.py -c ./weights/yolox_s.pth --path assets/dog.jpg --conf 0.25 --nms 0.45 --tsize 640 --save_result --device [cpu/gpu]
+
+python tools/demo.py image -n yolox-s -c ./weights/yolox_s.pth --path assets/dog.jpg --conf 0.25 --nms 0.45 --tsize 640 --save_result --device [cpu/gpu]
+
+自己：
+python tools/demo.py image -f exps/default/yolox_s.py -c ./weights/yolox_s.pth --path assets/dog.jpg --conf 0.25 --nms 0.45 --tsize 640 --save_result --device gpu
+
+python tools/demo.py image -n yolox-s -c ./weights/yolox_s.pth --path assets/dog.jpg --conf 0.25 --nms 0.45 --tsize 640 --save_result --device gpu
+
+视频：
+python tools/demo.py video -n yolox-s -c ./weights/yolox_s.pth --path /path/to/your/video --conf 0.25 --nms 0.45 --tsize 640 --save_result --device [cpu/gpu]
+
+
+训练命令：
+python -m yolox.tools.train -f exps/default/yolox_s.py -d 1 -b 8 --fp16 -o --cache
+                               exps/default/yolox_m.py
+                               exps/default/yolox_l.py
+                               exps/default/yolox_x.py
+coco数据集
+从头开始训练：
+python -m yolox.tools.train -f exps/default/yolox_s.py --devices 0 --batch-size 16 --fp16 --occupy --cache 
+python tools/train.py -f exps/default/yolox_s.py --devices 0 --batch-size 16 --fp16 --occupy --cache 
+
+加载预训练模型：
+python -m yolox.tools.train -f exps/default/yolox_s.py --devices 0 --batch-size 16 --fp16 --occupy --cache --ckpt ./weights/yolox_s.pth
+python tools/train.py -f exps/default/yolox_s.py --devices 0 --batch-size 16 --fp16 --occupy --cache --ckpt ./weights/yolox_s.pth
+
+
+voc数据集
+python tools/train.py -f exps/example/yolox_voc/yolox_voc_s.py --devices 0 --batch-size 8 --fp16 --occupy --cache  -c yolox_s.pth.tar
+
